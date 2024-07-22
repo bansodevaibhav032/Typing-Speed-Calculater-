@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
+import ttkthemes as tt
 
-root= tk.Tk()
-
+root= tt.ThemedTk()
+root.get_themes()
+root.set_theme('radiance')
 root.title("Typing Speed Calculater!")
 root.geometry('1140x800+250+10')
 root.resizable(False,False)
@@ -216,13 +218,34 @@ lbl_space=tk.Label(frame_space,bg='black',fg='white',width=50,height=2,relief='g
 lbl_space.grid(row=0,column=0,padx=10,pady=5)
 frame_space.grid(row=4)
 
-
-
 frame_keyword.grid(row=3,pady=10)
 
-
-
-
 main_frame.grid()
+
+
+# key binding 
+def changeBG(widget):
+    bg='black'
+    widget.configure(background='blue')
+    widget.after(100,lambda color=bg : widget.configure(background=color))
+
+labels_numbers=[lbl_1,lbl_2,lbl_3,lbl_4,lbl_5,lbl_6,lbl_7,lbl_8,lbl_9,lbl_0]
+labels_alpha=[lbl_A,lbl_B,lbl_C,lbl_D,lbl_E,lbl_F,lbl_G,lbl_H,lbl_I,lbl_J,lbl_K,lbl_L,lbl_M,lbl_N,lbl_O,lbl_P,lbl_Q,lbl_R,lbl_S,lbl_T,lbl_U,lbl_V,lbl_S,lbl_T,lbl_U,lbl_V,lbl_W,lbl_X,lbl_Y,lbl_Z]
+labels_space=[lbl_space]
+
+binding_numbers=['1','2','3','4','5','6','7','8','9','0']
+binding_capital_alpha = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+binding_small_alpha = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+for num in range(len(binding_numbers)):
+    root.bind(f"{binding_numbers[num]}",lambda event, label=labels_numbers[num]:changeBG(label))
+
+for alphabet in range(len(binding_capital_alpha)):
+    root.bind(f"{binding_capital_alpha[alphabet]}",lambda event, label=labels_alpha[alphabet]:changeBG(label))
+
+for alphabet2 in range(len(binding_small_alpha)):
+    root.bind(f"{binding_small_alpha[alphabet2]}",lambda event, label=labels_alpha[alphabet2]:changeBG(label))
+
+root.bind("<space>",lambda event, label=labels_space[0]:changeBG(label))
 
 root.mainloop()
