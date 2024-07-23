@@ -1,6 +1,128 @@
 import tkinter as tk
 from tkinter import ttk
 import ttkthemes as tt
+import time as tm
+import threading as td 
+import random as r 
+
+# initial variables
+
+timelimit=60
+remainingtime= timelimit
+elpasedtime=0
+elpasedtimeinmin=0
+
+totalwords=0
+wrongwords=0
+
+wpm=0
+accuracy=0
+
+def start_time():
+    global elpasedtime
+
+
+    entry.focus()
+    entry.config(state='normal')
+    btn_start.config(state='disabled')
+
+    for time in range(1,timelimit+1):
+        elpasedtime=time
+        lbl_elpasedtimer['text']=elpasedtime
+
+        updatedremainingtime= remainingtime-elpasedtime
+        lbl_remainingtimer['text']=updatedremainingtime
+
+
+        tm.sleep(1)
+        root.update()
+
+    entry.config(state='disabled')
+    btn_reset.config(state='normal')
+
+
+def count():
+    global wrongwords
+    global elpasedtime
+    global elpasedtimeinmin
+
+    para_words=lbl_paragraph['text'].split()
+
+    while elpasedtime != timelimit:
+        enteredparagraph= entry.get(1.0,'end-1c').split()
+        totalwords=len(enteredparagraph)
+
+    # para words
+    # enteredparagraph 
+
+    for pair in list(zip(para_words,enteredparagraph)):
+        if pair[0] !=pair[1]:
+            wrongwords +=1
+
+    elpasedtimeinmin=elpasedtime/60
+
+    #wpm
+    # ( totalwords=wrongwords) / time in minutes
+    wpm = (totalwords-wrongwords)/elpasedtimeinmin
+    lbl_wpm['text']=wpm
+
+    #accuracy
+    # accuracy=(wpm/gross_wpm)*100
+    gross_wpm=totalwords/elpasedtimeinmin
+    accuracy=(wpm/gross_wpm)*100
+    lbl_accuracy['text']=round(accuracy,2)
+    
+
+    # total words
+    lbl_tw['text']=totalwords
+
+    # wrong words
+    lbl_ww['text']=wrongwords
+
+
+
+def start():
+    thr1=td.Thread(target=start_time)
+    thr1.start()
+    thr2=td.Thread(target=count)
+    thr2.start()
+
+
+def reset():
+    global remainingtime
+    global elpasedtime
+
+    btn_reset.config(state='disabled')
+    btn_start.config(state='normal')
+
+    entry.config(state='normal')
+    entry.delete(1.0,tk.END)
+    entry.config(state='disabled')
+
+    remainingtime=timelimit
+    elpasedtime=0
+
+    lbl_elpasedtimer['text']=0
+    lbl_remainingtimer['text']=0
+    lbl_wpm['text']=0
+    lbl_accuracy['text']=0
+    lbl_tw['text']=0
+    lbl_ww['text']=0
+
+# Channging Paragraph 
+
+with open('paragraph.txt', encoding='utf-8') as f:
+    paragraphs= f.readlines()
+    selected_paragraph=r.choice(paragraphs)
+
+
+
+
+
+
+
+
+# ****************************** GUI ************************************
 
 root= tt.ThemedTk()
 root.get_themes()
@@ -23,8 +145,7 @@ lbl_title.grid(row=0,column=0,pady=10)
 frame_title.grid(row=0,column=0)
 
 # test frame
-selected_paragraph= 'India has given to the world many a great cricketer but perhaps none as ambitious as Virat Kohli. To meet his ambition, Kohli employed the technical assiduousness of Sachin Tendulkar and fitness that was in the league of top athletes in the world, not just cricketers. As a result, Kohli became the most consistent all-format accumulator of his time, making jaw-dropping chases look easy, and finding, in his own words, the safest possible way to score runs. Plenty of them.'
-frame_test=tk.LabelFrame(main_frame,text='Test',bg='white',relief='flat')
+frame_test=tk.LabelFrame(main_frame,text='Test',bg='white',relief='groove')
 
 # paragraph
 lbl_paragraph=tk.Label(frame_test,text=selected_paragraph, wraplength=1000,justify='left')
@@ -33,6 +154,7 @@ lbl_paragraph.grid(row=0,column=0,pady=5,padx=5)
 # inputbox
 entry=tk.Text(frame_test,height=8,width=120,border=2)
 entry.grid(row=1, column=0,pady=5,padx=5)
+entry.config(state='disabled')
 
 frame_test.grid(row=1,column=0)
 
@@ -51,7 +173,7 @@ lbl_elpasedtimer.grid(row=0,column=1,padx=10,pady=10)
 
 # remaining time 
 lbl_remainingtime= tk.Label(frame_labels,text='Remaining time',font='tahoma 10 bold', fg='red',bg='white')
-lbl_remainingtimer= tk.Label(frame_labels,text='0',font='tahoma 10 bold',fg='black',bg='white')
+lbl_remainingtimer= tk.Label(frame_labels,text='60',font='tahoma 10 bold',fg='black',bg='white')
 
 
 lbl_remainingtime.grid(row=0,column=2,padx=10,pady=10)
@@ -95,19 +217,19 @@ frame_labels.grid(row=0)
 # Control Frame 
 frame_control = tk.Frame(frame_out,bg='white')
 # start 
-btn_start= ttk.Button(frame_control,text='Start')
+btn_start= ttk.Button(frame_control,text='Start',command=start)
 
 btn_start.grid(row=0,column=0,padx=10)
 
 # reset 
-btn_reset= ttk.Button(frame_control,text='Reset')
-
-btn_reset.grid(row=0,column=1)
+btn_reset= ttk.Button(frame_control,text='Reset',command=reset)
+btn_reset.grid(row=0,column=1,padx=10)
+btn_reset.config(state="disabled")
 
 frame_control.grid(row=1)
 
 
-frame_out.grid(row=2,column=0,padx=10)
+frame_out.grid(row=2,column=0)
 
 
 # keyword frame 
@@ -191,7 +313,7 @@ lbl_K.grid(row=2,column=7,padx=10,pady=5)
 lbl_L.grid(row=2,column=8,padx=10,pady=5)
 
 frame_a_l.grid(row=2)
-# z-
+# z-m
 frame_z_m=tk.Frame(frame_keyword,bg='white')
 
 lbl_Z=tk.Label(frame_z_m,text='Q',bg='black',fg='white',width=5,height=2,relief='groove',bd=10)
@@ -248,4 +370,4 @@ for alphabet2 in range(len(binding_small_alpha)):
 
 root.bind("<space>",lambda event, label=labels_space[0]:changeBG(label))
 
-root.mainloop()
+root.mainloop() 
